@@ -10,7 +10,7 @@ namespace PerformanceBiller
         {
             var totalAmount = 0;
             var volumeCredits = 0;
-            var result = $"Statement for {invoice.GetValue("customer")}\n";
+            var result = $"Statement for {invoice.GetValue("customer")}\r\n";
             var cultureInfo = new CultureInfo("en-US");
 
             foreach (JObject perf in invoice.GetValue("performances")) {
@@ -38,11 +38,11 @@ namespace PerformanceBiller
                 // add extra credit for every ten comedy attendees
                 if ("comedy" == play.GetValue("type").ToString()) volumeCredits += Convert.ToInt32(perf.GetValue("audience")) / 5;
                 // print line for this order
-                result += $" {play.GetValue("name")}: {(thisAmount/100).ToString("C", cultureInfo)} ({perf.GetValue("audience")} seats)\n";
+                result += $" {play.GetValue("name")}: {(thisAmount/100).ToString("C", cultureInfo)} ({perf.GetValue("audience")} seats)\r\n";
                 totalAmount += thisAmount;
              }
-             result += $"Amount owed is {(totalAmount/100).ToString("C", cultureInfo)}\n";
-             result += $"You earned {volumeCredits} credits\n";
+             result += $"Amount owed is {(totalAmount/100).ToString("C", cultureInfo)}\r\n";
+             result += $"You earned {volumeCredits} credits\r\n";
 
              return result;
         }
