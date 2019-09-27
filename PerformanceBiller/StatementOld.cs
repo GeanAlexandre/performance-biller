@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace PerformanceBiller
 {
-    public class Statement
+    public class StatementOld
     {
         public string Run(JObject invoice, JObject plays)
         {

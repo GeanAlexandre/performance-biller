@@ -1,10 +1,8 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PerformanceBiller.Helpers;
-using PerformanceBiller.Management;
-using PerformanceBiller.Management.PlaysHandler;
-using System.Collections;
-using System.Collections.Generic;
+using PerformanceBiller.Statement.Models;
+using PerformanceBiller.Statement.Reports;
+using PerformanceBiller.Statement.Storage;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -20,11 +18,18 @@ namespace PerformanceBiller.Tests
             "Amount owed is $1,730.00\r\n" +
             "You earned 47 credits\r\n";
 
+        const string expectedOutputPt = "Statement for BigCo\r\n" +
+            " Hamlet: R$ 650,00 (55 seats)\r\n" +
+            " As You Like It: R$ 580,00 (35 seats)\r\n" +
+            " Othello: R$ 500,00 (40 seats)\r\n" +
+            "Amount owed is R$ 1.730,00\r\n" +
+            "You earned 47 credits\r\n";
+
         [Fact]
         public void Statement_can_run()
         {
 
-            var statement = new Statement();
+            var statement = new StatementOld();
 
             using (var invoicesFile = File.OpenText("..\\..\\..\\invoices.json"))
             using (var invoicesReader = new JsonTextReader(invoicesFile))
@@ -47,39 +52,18 @@ namespace PerformanceBiller.Tests
         [Fact]
         public void Should_Run_Statement()
         {
-            const string baseJsonPath = @"..\\..\\..\";
+            var invoiceStorage = new InvoiceStorage();
+            var invoice = invoiceStorage.GetAll().FirstOrDefault();
+            var invoiceStatement = new InvoiceStatement(invoice).Calculate();
 
-            var plays = JsonFileReader
-                .From(baseJsonPath)
-                .Plays()
-                .Deserialize<Dictionary<string, Play>>();
+            var summaryReportEn = invoiceStatement
+                .Report(template => Reports.EnglishUs(template).Summary());
 
-            var invoices = JsonFileReader
-                .From(baseJsonPath)
-                .Invoices()
-                .Deserialize<Invoice[]>()
-                .Select(invoice =>
-                     new Invoice
-                     {
-                         Customer = invoice.Customer,
-                         Performances = invoice
-                        .Performances
-                        .Select(perfomace => new Perfomance
-                        {
-                            PlayId = perfomace.PlayId,
-                            Play = plays.GetValueOrDefault(perfomace.PlayId),
-                            Audience = perfomace.Audience
-                        })
-                     });
+            var summaryReportPt = invoiceStatement
+                .Report(template => Reports.CustomCulture(template, "pt-BR").Summary());
 
-            var summaryReport = Management.Statement
-                .EnUs(invoices.FirstOrDefault())
-                .Calculate(new PlayHandlerFactory())
-                .Report(statement =>
-                     Reports.For(statement).Summary()
-                );
-
-            Assert.Equal(expectedOutput, summaryReport);
+            Assert.Equal(expectedOutput, summaryReportEn);
+            Assert.Equal(expectedOutputPt, summaryReportPt);
         }
     }
 }

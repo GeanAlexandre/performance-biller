@@ -14,10 +14,6 @@ namespace PerformanceBiller.Helpers
         public static JsonFileReader From(string basePath)
             => new JsonFileReader(basePath);
 
-        public string Invoices()
-            => File.ReadAllText($"{_basePath}\\invoices.json");
-
-        public string Plays()
-            => File.ReadAllText($"{_basePath}\\plays.json");
+        public T Read<T>(string jsonFileName) => File.ReadAllText($"{_basePath}\\{jsonFileName}.json").Deserialize<T>();
     }
 }

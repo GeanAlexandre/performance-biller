@@ -1,6 +1,6 @@
-﻿namespace PerformanceBiller.Management
+﻿namespace PerformanceBiller.Statement.Storage.Entities
 {
-    public class Play
+    public class PlayEntity
     {
         public string Name { get; set; }
         public string Type { get; set; }
